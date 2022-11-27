@@ -1,4 +1,5 @@
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.junit.Assert;
 import org.junit.Before;;
@@ -75,5 +76,61 @@ public class IntegrationTests {
         Assert.assertNotEquals(null, weatherMainJsonObject.getAsJsonObject("currentWeatherReport").has("temperature"));
         Assert.assertNotEquals(null, weatherMainJsonObject.getAsJsonObject("currentWeatherReport").has("humidity"));
         Assert.assertNotEquals(null, weatherMainJsonObject.getAsJsonObject("currentWeatherReport").has("pressure"));
+    }
+
+    @Test
+    public void testWeatherMainDate() {
+        Assert.assertEquals(currentDateFormated, weatherMainJsonObject.getAsJsonObject("currentWeatherReport").get("date").getAsString());
+    }
+    @Test
+    public void testWeatherMainCity(){
+        Assert.assertEquals(city, weatherMainJsonObject.getAsJsonObject("mainDetails").get("city").getAsString());
+    }
+    @Test
+    public void testWeatherMainCoordinates() {
+        Assert.assertEquals("24.7535,59.437", weatherMainJsonObject.getAsJsonObject("mainDetails").get("coordinates").getAsString());
+    }
+
+    @Test
+    public void testRoundElementsMethod() {
+        CurrentWeatherReport currentWeatherReport = new CurrentWeatherReport();
+        currentWeatherReport.setTemperature(278.40);
+        Assert.assertEquals(5.25,currentWeatherReport.getTemperature(),0);
+        currentWeatherReport.roundElements();
+        Assert.assertEquals(5,currentWeatherReport.getTemperature(),0);
+        currentWeatherReport.setTemperature(290.40);
+        currentWeatherReport.roundElements();
+        Assert.assertEquals(11,currentWeatherReport.getTemperature(),0);
+    }
+
+    @Test
+    public void testForecastReportElementsCount(){
+        int daysCounter = 0;
+        for(JsonElement ignored : foreCastJsonArray){
+            daysCounter += 1;
+        }
+        Assert.assertEquals(5,daysCounter);
+    }
+    @Test
+    public void testForecastReportLastDateCheck(){
+        int counter = 0;
+        JsonObject lastJsonObject = new JsonObject();
+        for(JsonElement element: foreCastJsonArray){
+            if(counter == foreCastJsonArray.size() - 1){
+                lastJsonObject = element.getAsJsonObject();
+            }
+            counter += 1;
+        }
+        Assert.assertEquals(lastDate, lastJsonObject.get("date").getAsString());
+    }
+    @Test
+    public void testForecastContainsAllElements(){
+        for(JsonElement element: foreCastJsonArray){
+            JsonObject jsonObject = element.getAsJsonObject();
+            Assert.assertNotEquals(null,jsonObject.get("date"));
+            Assert.assertNotEquals(null,jsonObject.getAsJsonObject("weather").get("humidity"));
+            Assert.assertNotEquals(null,jsonObject.getAsJsonObject("weather").get("temperature"));
+            Assert.assertNotEquals(null,jsonObject.getAsJsonObject("weather").get("pressure"));
+        }
     }
 }
