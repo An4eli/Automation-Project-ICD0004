@@ -38,4 +38,40 @@ public class SmokeTests {
                 .then()
                 .statusCode(200);
     }
+
+    @Test
+    public void getWeatherApiWithoutKey() {
+        when()
+                .get(API_URL)
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    public void getWeatherHttp() {
+        given()
+                .contentType(JSON.toString())
+                .when()
+                .get(API_URL + CITY + KEY_API)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test
+    public void getWeatherForecastHttp() {
+        when()
+                .get(FORECAST_API)
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    public void getWeatherForecastApi() {
+        given()
+                .contentType(JSON.toString())
+                .when()
+                .get(FORECAST_API + CITY + KEY_API)
+                .then()
+                .statusCode(200);
+    }
 }
