@@ -1,3 +1,5 @@
+package api.dto;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 

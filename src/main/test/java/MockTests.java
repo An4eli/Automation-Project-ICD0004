@@ -1,3 +1,7 @@
+import api.WeatherApi;
+import api.dto.CurrentWeatherReport;
+import api.dto.ForecastReport;
+import api.dto.MainDetails;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

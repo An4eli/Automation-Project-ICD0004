@@ -1,5 +1,4 @@
-import java.text.SimpleDateFormat;
-import java.util.Date;
+package api.dto;
 
 public class ForecastReport {
     private String date;

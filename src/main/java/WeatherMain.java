@@ -1,3 +1,7 @@
+import api.dto.CurrentWeatherReport;
+import api.dto.ForecastReport;
+import api.dto.MainDetails;
+
 import java.util.ArrayList;
 
 public class WeatherMain {

@@ -1,3 +1,5 @@
+package api.dto;
+
 public class MainDetails {
     String city;
     String coordinates;

@@ -1,3 +1,5 @@
+import api.WeatherApi;
+import api.dto.CurrentWeatherReport;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
