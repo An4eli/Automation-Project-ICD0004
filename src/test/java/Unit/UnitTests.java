@@ -1,3 +1,8 @@
+package Unit;
+
+import exceptions.FileNotFoundException;
+import exceptions.InvalidFileFormatException;
+import logs.LogsAppender;
 import api.WeatherApi;
 import api.dto.CurrentWeatherReport;
 import org.junit.Assert;
@@ -5,9 +10,11 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import weather.WeatherHandler;
+import weather.utils.DateFormatter;
+
 import java.io.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UnitTests {
     String wrongFile;
@@ -17,9 +24,7 @@ public class UnitTests {
     LogsAppender logsAppender;
     String invalidCityName;
     String filePath;
-
-    private static Logger LOGGER = LoggerFactory.getLogger(WeatherApi.class);
-    private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+    String date;
     WeatherApi weatherApiObject;
 
     @Before
@@ -32,7 +37,7 @@ public class UnitTests {
         fileWithWrongCity = "src/test/java/cities.txt";
         stringToLookFor = "Lisbon";
         filePath = "StaticForecast.json";
-        System.setOut(new PrintStream(outputStreamCaptor));
+        date = "1997-08-25";
     }
 
     @Rule
@@ -40,27 +45,32 @@ public class UnitTests {
 
     @Test
     public void testWrongFileFormat() {
-        WeatherApi.openFile(wrongFileType);
-        Assert.assertEquals("Invalid file format!", outputStreamCaptor.toString()
-                .trim());
+        Exception exception = assertThrows(InvalidFileFormatException.class, () -> {
+            WeatherHandler.openFile(wrongFileType);
+        });
+        Assert.assertEquals("Invalid file format!",exception.getMessage());
     }
 
     @Test
     public void testWrongFileName() {
-        WeatherApi.openFile(wrongFile);
-        Assert.assertEquals("File not found!", outputStreamCaptor.toString()
-                .trim());
+        Exception exception = assertThrows(FileNotFoundException.class, () -> {
+            WeatherHandler.openFile(wrongFile);
+        });
+        Assert.assertEquals("File not found!", exception.getMessage());
     }
 
     @Test
     public void testWrongCityName() throws IOException {
-        String errorMessage = invalidCityName + " is invalid city name, file not created!";
+        String errorMessage = invalidCityName + " is invalid city name, file not created!\n";
         BufferedReader r = new BufferedReader(new StringReader(invalidCityName));
-        weatherApiObject.readFile(r);
+        WeatherHandler.readFile(r);
         Assert.assertTrue(LogsAppender.returnLogList().size() > 0);
         Assert.assertEquals(errorMessage, LogsAppender.returnLogList().get(LogsAppender.returnLogList().size() - 1));
     }
-
+    @Test
+    public void testDateFormatter(){
+        Assert.assertEquals("25-08-1997", DateFormatter.formatDate(date));
+    }
     @Test
     public void testCurrentWeatherReportTemp() {
         CurrentWeatherReport currentWeatherReport = new CurrentWeatherReport();
@@ -69,7 +79,6 @@ public class UnitTests {
         currentWeatherReport.setTemperature(279.15);
         Assert.assertEquals(5, currentWeatherReport.getTemperature(), 0);
     }
-
     @Test
     public void testCurrentWeatherReportHumidity() {
         CurrentWeatherReport currentWeatherReport = new CurrentWeatherReport();
@@ -78,7 +87,6 @@ public class UnitTests {
         currentWeatherReport.setHumidity(90);
         Assert.assertEquals(75, currentWeatherReport.getHumidity(), 0);
     }
-    
     @Test
     public void testCurrentWeatherReportPreassure() {
         CurrentWeatherReport currentWeatherReport = new CurrentWeatherReport();

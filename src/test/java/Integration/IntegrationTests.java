@@ -1,16 +1,24 @@
+package Integration;
+
 import api.WeatherApi;
-import api.dto.CurrentWeatherReport;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import api.dto.CurrentWeatherReport;
+import api.dto.ForecastReport;
+import api.dto.WeatherDTO;
 import org.junit.Assert;
 import org.junit.Before;;
 import org.junit.Test;
+import weather.utils.Request;
+import weather.utils.*;
+
 import java.io.IOException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -23,9 +31,9 @@ public class IntegrationTests {
     Date currentDate = new Date();
     String currentDateFormated = sdf.format(currentDate);
     String lastDate;
-    JsonObject weatherMainJsonObject;
-    JsonObject foreCastJsonObject;
-    JsonArray foreCastJsonArray;
+    JsonObject weatherMainJsonObject = new JsonObject();
+    JsonObject foreCastJsonObject = new JsonObject();
+    JsonArray foreCastJsonArray = new JsonArray();
 
     @Before
     public void setUp() {
@@ -33,7 +41,6 @@ public class IntegrationTests {
         rightApi = "https://api.openweathermap.org/data/2.5/weather?q=";
         wrongApi = "https://api.openweathermap.org/dataa/2.5/wrong!!";
     }
-
     @Before
     public void setUpLastForecastDate() throws ParseException {
         Calendar c = Calendar.getInstance();
@@ -41,37 +48,35 @@ public class IntegrationTests {
         c.add(Calendar.DATE, 3);  // number of days to add
         lastDate = sdf.format(c.getTime());
     }
-
     @Before
     public void setUpWeatherMain() throws IOException, InterruptedException {
-        WeatherMain weatherMain = new WeatherMain();
-        WeatherApi.weatherMainAPI(weatherMain, city);
-        weatherMainJsonObject = WeatherApi.toJsonObject(weatherMain);
+        WeatherApi weatherApi = new WeatherApi();
+        WeatherDTO weatherDTO  = weatherApi.weatherMainAPI(city);
+        weatherMainJsonObject = JsonFormatter.toJsonObject(weatherDTO);
     }
-
     @Before
     public void setUpForecastReport() throws IOException, InterruptedException {
-        WeatherMain weatherMain = new WeatherMain();
+        WeatherDTO weatherMain = new WeatherDTO();
         WeatherApi weatherApi = new WeatherApi();
-        weatherApi.forecastAPI(weatherMain, city);
-        foreCastJsonObject = WeatherApi.toJsonObject(weatherMain);
+        ArrayList<ForecastReport> forecastReportList = weatherApi.forecastAPI(city);
+        for(ForecastReport forecastReport1 : forecastReportList){
+            weatherMain.setForecastReport(forecastReport1);
+        }
+        foreCastJsonObject = JsonFormatter.toJsonObject(weatherMain);
         foreCastJsonArray = foreCastJsonObject.getAsJsonArray("forecastReport");
     }
-
     @Test
     public void checkApi() throws IOException, InterruptedException {
-        HttpRequest request = WeatherApi.getRequest(rightApi, city);
-        HttpResponse<String> response = WeatherApi.getResponse(request);
+        HttpRequest request = Request.getRequest(rightApi, city);
+        HttpResponse<String> response = Response.getResponse(request);
         Assert.assertEquals(200, response.statusCode());
     }
-
     @Test
     public void checkNotWorkingApi() throws IOException, InterruptedException {
-        HttpRequest request = WeatherApi.getRequest(wrongApi, city);
-        HttpResponse<String> response = WeatherApi.getResponse(request);
+        HttpRequest request = Request.getRequest(wrongApi, city);
+        HttpResponse<String> response = Response.getResponse(request);
         Assert.assertEquals(401, response.statusCode());
     }
-
     @Test
     public void testWeatherMainContainsAllElements() {
         Assert.assertNotEquals(null, weatherMainJsonObject.getAsJsonObject("currentWeatherReport").get("date"));
@@ -79,7 +84,6 @@ public class IntegrationTests {
         Assert.assertNotEquals(null, weatherMainJsonObject.getAsJsonObject("currentWeatherReport").has("humidity"));
         Assert.assertNotEquals(null, weatherMainJsonObject.getAsJsonObject("currentWeatherReport").has("pressure"));
     }
-
     @Test
     public void testWeatherMainDate() {
         Assert.assertEquals(currentDateFormated, weatherMainJsonObject.getAsJsonObject("currentWeatherReport").get("date").getAsString());
@@ -92,7 +96,6 @@ public class IntegrationTests {
     public void testWeatherMainCoordinates() {
         Assert.assertEquals("24.7535,59.437", weatherMainJsonObject.getAsJsonObject("mainDetails").get("coordinates").getAsString());
     }
-
     @Test
     public void testRoundElementsMethod() {
         CurrentWeatherReport currentWeatherReport = new CurrentWeatherReport();
@@ -111,7 +114,7 @@ public class IntegrationTests {
         for(JsonElement ignored : foreCastJsonArray){
             daysCounter += 1;
         }
-        Assert.assertEquals(5,daysCounter);
+        Assert.assertEquals(3,daysCounter);
     }
     @Test
     public void testForecastReportLastDateCheck(){

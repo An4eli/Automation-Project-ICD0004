@@ -1,7 +1,10 @@
+package Mock;
+
 import api.WeatherApi;
 import api.dto.CurrentWeatherReport;
 import api.dto.ForecastReport;
 import api.dto.MainDetails;
+import api.dto.WeatherDTO;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,25 +25,25 @@ public class MockTests {
     @Mock
     static WeatherApi weatherApi;
     static CurrentWeatherReport currentWeatherReport;
-    static WeatherMain weatherMain;
+    static WeatherDTO weatherDTO;
     static MainDetails mainDetails;
     static ForecastReport forecastReportObject;
     static CurrentWeatherReport currentWeatherReportObject;
-    static WeatherMain weatherMainObject;
+    static WeatherDTO weatherDTOObject;
 
 
     private static final String city = "Tallinn";
 
     @BeforeAll
     public static void weatherForecastMainTest() {
-        weatherMainObject = new WeatherMain();
+        weatherDTOObject = new WeatherDTO();
         forecastReportObject = new ForecastReport();
         currentWeatherReportObject = new CurrentWeatherReport();
         currentWeatherReportObject.setPressure(100);
         currentWeatherReportObject.setHumidity(30);
         currentWeatherReportObject.setTemperature(300.00);
         forecastReportObject.setWeather(currentWeatherReportObject);
-        weatherMainObject.setForecastReport(forecastReportObject);
+        weatherDTOObject.setForecastReport(forecastReportObject);
     }
 
     @BeforeAll
@@ -52,34 +55,34 @@ public class MockTests {
         currentWeatherReport.setPressure(50);
         currentWeatherReport.setTemperature(300.00);
         currentWeatherReport.setHumidity(100);
-        weatherMain = new WeatherMain();
-        weatherMain.setMainDetails(mainDetails);
-        weatherMain.setCurrentWeatherReport(currentWeatherReport);
+        weatherDTO = new WeatherDTO();
+        weatherDTO.setMainDetails(mainDetails);
+        weatherDTO.setCurrentWeatherReport(currentWeatherReport);
     }
 
     @Test
     public void testGetTemperature() throws IOException, InterruptedException {
-        when(weatherApi.weatherMainAPI(anyString())).thenReturn(weatherMain);
-        WeatherMain weatherGetTemperature = weatherApi.weatherMainAPI(city);
-        assertThat(weatherMain.getCurrentWeatherReport().getTemperature(), equalTo(weatherGetTemperature.getCurrentWeatherReport().getTemperature()));
+        when(weatherApi.weatherMainAPI(anyString())).thenReturn(weatherDTO);
+        WeatherDTO weatherGetTemperature = weatherApi.weatherMainAPI(city);
+        assertThat(weatherDTO.getCurrentWeatherReport().getTemperature(), equalTo(weatherGetTemperature.getCurrentWeatherReport().getTemperature()));
     }
 
     @Test
     public void testGetPressure() throws IOException, InterruptedException {
-        when(weatherApi.weatherMainAPI(anyString())).thenReturn(weatherMain);
-        WeatherMain weatherGetPressure = weatherApi.weatherMainAPI(city);
-        assertThat(weatherMain.getCurrentWeatherReport().getPressure(), equalTo(weatherGetPressure.getCurrentWeatherReport().getPressure()));
+        when(weatherApi.weatherMainAPI(anyString())).thenReturn(weatherDTO);
+        WeatherDTO weatherGetPressure = weatherApi.weatherMainAPI(city);
+        assertThat(weatherDTO.getCurrentWeatherReport().getPressure(), equalTo(weatherGetPressure.getCurrentWeatherReport().getPressure()));
     }
 
     @Test
     public void testGetHumidity() throws IOException, InterruptedException {
-        when(weatherApi.weatherMainAPI(anyString())).thenReturn(weatherMain);
-        WeatherMain weatherGetHumidity = weatherApi.weatherMainAPI(city);
-        assertThat(weatherMain.getCurrentWeatherReport().getHumidity(), equalTo(weatherGetHumidity.getCurrentWeatherReport().getHumidity()));
+        when(weatherApi.weatherMainAPI(anyString())).thenReturn(weatherDTO);
+        WeatherDTO weatherGetHumidity = weatherApi.weatherMainAPI(city);
+        assertThat(weatherDTO.getCurrentWeatherReport().getHumidity(), equalTo(weatherGetHumidity.getCurrentWeatherReport().getHumidity()));
     }
     @Test
     public void testGetHumidityForecast() throws IOException, InterruptedException {
-        ArrayList<ForecastReport> forecastReportsList = weatherMainObject.getForecastReport();
+        ArrayList<ForecastReport> forecastReportsList = weatherDTOObject.getForecastReport();
         when(weatherApi.forecastAPI(anyString())).thenReturn(forecastReportsList);
         ArrayList<ForecastReport> forecastAPIGetHumidity = weatherApi.forecastAPI(city);
         for(ForecastReport forecastReport: forecastAPIGetHumidity){
@@ -91,7 +94,7 @@ public class MockTests {
 
     @Test
     public void testGetPressureForecast() throws IOException, InterruptedException {
-        ArrayList<ForecastReport> forecastReportsList = weatherMainObject.getForecastReport();
+        ArrayList<ForecastReport> forecastReportsList = weatherDTOObject.getForecastReport();
         when(weatherApi.forecastAPI(anyString())).thenReturn(forecastReportsList);
         ArrayList<ForecastReport> forecastAPIGetPressure = weatherApi.forecastAPI(city);
         for(ForecastReport forecastReport: forecastAPIGetPressure){
@@ -103,7 +106,7 @@ public class MockTests {
 
     @Test
     public void testGetTemperatureForecast() throws IOException, InterruptedException {
-        ArrayList<ForecastReport> forecastReportsList = weatherMainObject.getForecastReport();
+        ArrayList<ForecastReport> forecastReportsList = weatherDTOObject.getForecastReport();
         when(weatherApi.forecastAPI(anyString())).thenReturn(forecastReportsList);
         ArrayList<ForecastReport> forecastAPIGetTemperature = weatherApi.forecastAPI(city);
         for(ForecastReport forecastReport: forecastAPIGetTemperature){
@@ -113,3 +116,4 @@ public class MockTests {
         }
     }
 }
+
