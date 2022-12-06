@@ -151,7 +151,7 @@ public class IntegrationTests {
     @Test
     public void testCanCreateCorrectFileFromTxt() throws IOException, InvalidFileFormatException, FileNotFoundException {
 
-        String txtFile = "cities.txt";
+        String txtFile = "src/test/java/cities.txt";
 
         WeatherHandler.readFile(openFile(txtFile));
 
@@ -165,7 +165,7 @@ public class IntegrationTests {
     @Test
     public void testMustNotCreateForecastFromTxt() throws IOException, InvalidFileFormatException, FileNotFoundException {
 
-        String txtFile = "wrong_cities.txt";
+        String txtFile = "src/test/java/wrong_cities.txt";
 
         WeatherHandler.readFile(openFile(txtFile));
 
