@@ -7,20 +7,30 @@ import com.google.gson.JsonObject;
 import api.dto.CurrentWeatherReport;
 import api.dto.ForecastReport;
 import api.dto.WeatherDTO;
+import exceptions.FileNotFoundException;
+import exceptions.InvalidFileFormatException;
+import logs.LogsAppender;
 import org.junit.Assert;
 import org.junit.Before;;
 import org.junit.Test;
+import weather.WeatherHandler;
 import weather.utils.Request;
 import weather.utils.*;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+
+import static weather.WeatherHandler.*;
+import static weather.WeatherHandler.openFile;
 
 public class IntegrationTests {
     String fileWithWrongCity;
@@ -137,5 +147,30 @@ public class IntegrationTests {
             Assert.assertNotEquals(null,jsonObject.getAsJsonObject("weather").get("temperature"));
             Assert.assertNotEquals(null,jsonObject.getAsJsonObject("weather").get("pressure"));
         }
+    }
+    @Test
+    public void testCanCreateCorrectFileFromTxt() throws IOException, InvalidFileFormatException, FileNotFoundException {
+
+        String txtFile = "cities.txt";
+
+        WeatherHandler.readFile(openFile(txtFile));
+
+        Path path_for_tln = Paths.get("Tallinn.json");
+        Assert.assertTrue(Files.exists(path_for_tln));
+
+        Path path_for_riga = Paths.get("Riga.json");
+        Assert.assertTrue(Files.exists(path_for_riga));
+
+    }
+    @Test
+    public void testMustNotCreateForecastFromTxt() throws IOException, InvalidFileFormatException, FileNotFoundException {
+
+        String txtFile = "wrong_cities.txt";
+
+        WeatherHandler.readFile(openFile(txtFile));
+
+        Path path_for_tln = Paths.get("Tallinn123.json");
+        Assert.assertFalse(Files.exists(path_for_tln));
+
     }
 }
