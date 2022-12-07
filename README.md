@@ -70,3 +70,20 @@ Application creates .json file containing weather report data for each city in t
 ```
 mvn test
 ```
+### Run tests separately
+Unit tests
+```
+mvn test -Dtest=UnitTests
+```
+Integration tests
+```
+mvn test -Dtest=IntegrationTests
+```
+Mock tests
+```
+mvn test -Dtest=MockTests
+```
+Smoke tests
+```
+mvn test -Dtest=SmokeTests
+```
