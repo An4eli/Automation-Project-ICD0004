@@ -153,7 +153,8 @@ public class IntegrationTests {
 
         String txtFile = "src/test/java/cities.txt";
 
-        WeatherHandler.readFile(openFile(txtFile));
+        BufferedReader bufferedReaderCities = WeatherHandler.openFile(txtFile);
+        WeatherHandler.readFile(bufferedReaderCities);
 
         Path path_for_tln = Paths.get("Tallinn.json");
         Assert.assertTrue(Files.exists(path_for_tln));
@@ -161,13 +162,18 @@ public class IntegrationTests {
         Path path_for_riga = Paths.get("Riga.json");
         Assert.assertTrue(Files.exists(path_for_riga));
 
+        File fileTallinn = new File("Tallinn.json");
+        File fileRiga = new File("Riga.json");
+        fileTallinn.delete();
+        fileRiga.delete();
     }
     @Test
     public void testMustNotCreateForecastFromTxt() throws IOException, InvalidFileFormatException, FileNotFoundException {
 
         String txtFile = "src/test/java/wrong_cities.txt";
 
-        WeatherHandler.readFile(openFile(txtFile));
+        BufferedReader bufferedReaderCities = WeatherHandler.openFile(txtFile);
+        WeatherHandler.readFile(bufferedReaderCities);
 
         Path path_for_tln = Paths.get("Tallinn123.json");
         Assert.assertFalse(Files.exists(path_for_tln));
