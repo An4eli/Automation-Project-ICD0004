@@ -9,7 +9,6 @@ import api.dto.ForecastReport;
 import api.dto.WeatherDTO;
 import exceptions.FileNotFoundException;
 import exceptions.InvalidFileFormatException;
-import logs.LogsAppender;
 import org.junit.Assert;
 import org.junit.Before;;
 import org.junit.Test;
@@ -33,10 +32,12 @@ import static weather.WeatherHandler.*;
 import static weather.WeatherHandler.openFile;
 
 public class IntegrationTests {
+    String fileWithRightCities;
     String fileWithWrongCity;
     String rightApi;
     String wrongApi;
-    String city = "Tallinn";
+    String cityOne = "Tallinn";
+    String cityTwo = "Rome";;
     SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
     Date currentDate = new Date();
     String currentDateFormated = sdf.format(currentDate);
@@ -47,7 +48,8 @@ public class IntegrationTests {
 
     @Before
     public void setUp() {
-        fileWithWrongCity = "src/test/java/cities.txt";
+        fileWithRightCities = "src/test/java/cities.txt";
+        fileWithWrongCity = "src/test/java/wrong_cities.txt";
         rightApi = "https://api.openweathermap.org/data/2.5/weather?q=";
         wrongApi = "https://api.openweathermap.org/dataa/2.5/wrong!!";
     }
@@ -61,14 +63,14 @@ public class IntegrationTests {
     @Before
     public void setUpWeatherMain() throws IOException, InterruptedException {
         WeatherApi weatherApi = new WeatherApi();
-        WeatherDTO weatherDTO  = weatherApi.weatherMainAPI(city);
+        WeatherDTO weatherDTO  = weatherApi.weatherMainAPI(cityOne);
         weatherMainJsonObject = JsonFormatter.toJsonObject(weatherDTO);
     }
     @Before
     public void setUpForecastReport() throws IOException, InterruptedException {
         WeatherDTO weatherMain = new WeatherDTO();
         WeatherApi weatherApi = new WeatherApi();
-        ArrayList<ForecastReport> forecastReportList = weatherApi.forecastAPI(city);
+        ArrayList<ForecastReport> forecastReportList = weatherApi.forecastAPI(cityOne);
         for(ForecastReport forecastReport1 : forecastReportList){
             weatherMain.setForecastReport(forecastReport1);
         }
@@ -77,13 +79,13 @@ public class IntegrationTests {
     }
     @Test
     public void checkApi() throws IOException, InterruptedException {
-        HttpRequest request = Request.getRequest(rightApi, city);
+        HttpRequest request = Request.getRequest(rightApi, cityOne);
         HttpResponse<String> response = Response.getResponse(request);
         Assert.assertEquals(200, response.statusCode());
     }
     @Test
     public void checkNotWorkingApi() throws IOException, InterruptedException {
-        HttpRequest request = Request.getRequest(wrongApi, city);
+        HttpRequest request = Request.getRequest(wrongApi, cityOne);
         HttpResponse<String> response = Response.getResponse(request);
         Assert.assertEquals(401, response.statusCode());
     }
@@ -100,7 +102,7 @@ public class IntegrationTests {
     }
     @Test
     public void testWeatherMainCity(){
-        Assert.assertEquals(city, weatherMainJsonObject.getAsJsonObject("mainDetails").get("city").getAsString());
+        Assert.assertEquals(cityOne, weatherMainJsonObject.getAsJsonObject("mainDetails").get("city").getAsString());
     }
     @Test
     public void testWeatherMainCoordinates() {
@@ -149,12 +151,9 @@ public class IntegrationTests {
         }
     }
     @Test
-    public void testCanCreateCorrectFileFromTxt() throws IOException, InvalidFileFormatException, FileNotFoundException {
-
-        String txtFile = "src/test/java/cities.txt";
-
-        BufferedReader bufferedReaderCities = WeatherHandler.openFile(txtFile);
-        WeatherHandler.readFile(bufferedReaderCities);
+    public void testCanCreateCorrectFileFromTxt() throws IOException, InvalidFileFormatException, FileNotFoundException {String filePath = "src/test/java/cities.txt";
+        BufferedReader bufferedReaderCity = WeatherHandler.openFile(fileWithRightCities);
+        WeatherHandler.readFile(bufferedReaderCity);
 
         Path path_for_tln = Paths.get("Tallinn.json");
         Assert.assertTrue(Files.exists(path_for_tln));
@@ -168,15 +167,29 @@ public class IntegrationTests {
         fileRiga.delete();
     }
     @Test
-    public void testMustNotCreateForecastFromTxt() throws IOException, InvalidFileFormatException, FileNotFoundException {
+    public void testWrongCityNameCreate() throws IOException, InvalidFileFormatException, FileNotFoundException {
 
-        String txtFile = "src/test/java/wrong_cities.txt";
-
-        BufferedReader bufferedReaderCities = WeatherHandler.openFile(txtFile);
-        WeatherHandler.readFile(bufferedReaderCities);
+        BufferedReader bufferedReaderCity = WeatherHandler.openFile(fileWithWrongCity);
+        WeatherHandler.readFile(bufferedReaderCity);
 
         Path path_for_tln = Paths.get("Tallinn123.json");
         Assert.assertFalse(Files.exists(path_for_tln));
+    }
+    @Test
+    public void testCreatedFilesNotEquals() throws IOException, InterruptedException {
+        WeatherApi weatherApiObject = new WeatherApi();
+        WeatherDTO weatherDTOObject = weatherApiObject.weatherMainAPI(cityOne);
+        createWeatherFile(weatherDTOObject, cityOne);
 
+        weatherApiObject = new WeatherApi();
+        weatherDTOObject = weatherApiObject.weatherMainAPI(cityTwo);
+        createWeatherFile(weatherDTOObject, cityTwo);
+
+        File fileTallinn = new File("Tallinn.json");
+        File fileRome = new File("Rome.json");
+        Assert.assertNotEquals(fileTallinn,fileRome);
+
+        fileTallinn.delete();
+        fileRome.delete();
     }
 }
