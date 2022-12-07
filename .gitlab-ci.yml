@@ -25,6 +25,11 @@ stages:          # List of stages for jobs, and their order of execution
   - test
   - deploy
 
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == 'main'
+
 build-job:       # This job runs in the build stage, which runs first.
   stage: build
   script:
